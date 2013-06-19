@@ -77,6 +77,11 @@ if __name__ == '__main__':
         'links.forward': [80]
     }
 
-    print disect_record(r1, schema, columns)
+    disect_record(r1, schema, columns)
     print '`````'
-    print disect_record(r2, schema, columns)
+    disect_record(r2, schema, columns)
+
+    print columns['links.forward']
+
+
+
