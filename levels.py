@@ -64,12 +64,14 @@ class Writer():
     def __init__(self, parent=None, field_id='__base__'):
         self.parent = parent
         self.field_id = field_id
-        self.rlevel = None
-        self.dlevel = None
 
-    def write(self, value):
+    def write(self, value, rlevel):
         print self.path
-        print (value, self.rlevel, self.dlevel)
+        print (value, rlevel, self.get_dlevel(value))
+
+    def get_dlevel(self, value):
+        depth = self.get_tree_depth()
+        return depth if value else depth -1
 
     def get_tree_depth(self):
         depth = 0
@@ -86,7 +88,8 @@ class Writer():
         while parent:
             parts.append(parent.field_id)
             parent = parent.parent
-        ".".join(parts)
+        parts.reverse()
+        return ".".join(parts)
 
 class Decoder():
     def __init__(self, schema, record):
@@ -112,7 +115,7 @@ def findit(field_id, fields):
         return matches[0]
 
 def stripe_record(decoder, writer, rlevel=0):
-    writer.rlevel = rlevel
+    # add current definition and repetition level to writer (something to do with version maybe)?
     seen_fields = set()
 
     for field in decoder.fields:
@@ -125,7 +128,7 @@ def stripe_record(decoder, writer, rlevel=0):
 
         if field.type != 'record':
             # How to we handle repeated atomic values?
-            child_writer.write(decoder.get_value(field.name))
+            child_writer.write(decoder.get_value(field.name), child_rlevel)
         else:
             child_schema = findit(field.name, decoder.schema.fields)
             print child_schema
@@ -163,30 +166,6 @@ if __name__ == '__main__':
     }
 
     print stripe_record(Decoder(schema, r1), Writer())
-    #r1 = {
-        #'id': 10,
-        #'links.forward': [20, 40, 80]
-    #}
+    print '````'
 
-    #r2 = {
-        #'id': 20,
-        #'links.backward': [10, 30],
-        #'links.forward': [80]
-    #}
-
-    #columns = {
-        #'id': [],
-        #'links.forward': [],
-        #'links.backward': []
-    #}
-
-    #disect_record(r1, schema, columns)
-    #print '`````'
-    #disect_record(r2, schema, columns)
-
-    #print columns['id']
-    #print columns['links.forward']
-    #print columns['links.backward']
-
-
-
+    print stripe_record(Decoder(schema, r2), Writer())
