@@ -1,4 +1,5 @@
 import re
+from collections import namedtuple
 # procedure DissectRecord(RecordDecoder decoder, FieldWriter writer, int repetitionLevel):
 #     Add current repetitionLevel and definition level to writer
 #
@@ -59,42 +60,106 @@ def disect_record(record, schema, columns, rlevel=0):
 
     return columns
 
+class Writer():
+    def __init__(self, field_id=None):
+        self.rlevel = 0
+        self.dlevel = 0
+        self.field_id = field_id
 
+    def write(self, value):
+        print (value, rlevel, dlevel)
+
+class Decoder
+    def __init__(self, schema, record):
+        self.schema = schema
+        self.record = record
+
+    def fields(self):
+        return self.schema.fields
+
+    def get_value(self, field_id):
+        # Need to change this depending on whether value is atomic or not?
+        # Or will we never have a decoder with an atomic value?
+        return self.record.get(field_id)
+
+# dlevel = how many fields that could be undeﬁned (because they are optional or repeated) are actually present
+# rlevel = The level of the last repeated ﬁeld
+
+def stripe_record(decoder, writer, rlevel=0):
+    writer.rlevel = rlevel
+    writer.dlevel = get_current_dlevel
+    seen_fields = set()
+
+    for field in decoder.fields:
+        child_writer = Writer(decoder(field)) # child of `writer` for field read by `decoder`
+        child_rlevel = rlevel
+        if child_writer.field_id in seen_fields:
+            child_rlevel = tree_depth_of_child_writer
+        else:
+            seen_fields.add(child_writer.field_id)
+
+        if field.type != 'record':
+            # How to we handle repeated atomic values?
+            write_value(child_writer, child_rlevel)
+        else:
+            child_decoder = Decoder()
+            stripe_record(child_decoder, child_writer, child_rlevel)
+
+
+Field = namedtuple('Field', 'name type mode fields')
 
 if __name__ == '__main__':
 
-    schema = {
-        'id': {'required': True, 'type': int, 'path': 'id'},
-        'links': {'required': False, 'type': 'group', 'children': {
-            'forward': {'required': False, 'type': int, 'repeated': True, 'path': 'links.forward'},
-            'backward': {'required': False, 'type': int, 'repeated': True, 'path': 'links.backward'}
-        }}
-    }
-
-    columns = {
-        'id': [],
-        'links.forward': [],
-        'links.backward': []
-    }
+    schema = Field('__base__', 'record', 'required',
+        [
+            Field('id', int, 'required', None),
+            Field('links', 'record', 'optional', [
+                Field('forward', int, 'repeated', None),
+                Field('backward', int, 'repeated', None),
+            ]),
+        ]
+    )
 
     r1 = {
         'id': 10,
-        'links.forward': [20, 40, 80]
+        'links' : {
+            'forward': [20, 40, 60]
+        }
     }
 
     r2 = {
         'id': 20,
-        'links.backward': [10, 30],
-        'links.forward': [80]
+        'links' : {
+            'backward': [10, 30],
+            'forward': [80]
+        }
     }
 
-    disect_record(r1, schema, columns)
-    print '`````'
-    disect_record(r2, schema, columns)
+    print stripe_record(Decoder(schema, r1), Writer())
+    #r1 = {
+        #'id': 10,
+        #'links.forward': [20, 40, 80]
+    #}
 
-    print columns['id']
-    print columns['links.forward']
-    print columns['links.backward']
+    #r2 = {
+        #'id': 20,
+        #'links.backward': [10, 30],
+        #'links.forward': [80]
+    #}
+
+    #columns = {
+        #'id': [],
+        #'links.forward': [],
+        #'links.backward': []
+    #}
+
+    #disect_record(r1, schema, columns)
+    #print '`````'
+    #disect_record(r2, schema, columns)
+
+    #print columns['id']
+    #print columns['links.forward']
+    #print columns['links.backward']
 
 
 
