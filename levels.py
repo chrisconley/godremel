@@ -58,8 +58,7 @@ class Writer():
         return depth
 
     def get_repeated_field_depth(self):
-        depth = 1 # for self
-        #depth = 1 if self.repeated else 0
+        depth = 1 if self.repeated else 0
         parent = self.parent
         while parent:
             if parent and parent.repeated:
@@ -68,14 +67,12 @@ class Writer():
         return depth
 
     def get_full_tree_depth(self):
-        #depth = 1 # for self
-        depth = 0
+        depth = 1 # for self
         parent = self.parent
         while parent:
-            parent = parent.parent and parent.mode == 'repeated'
-            #if parent:
-                #depth += 1
-            depth += 1
+            if parent:
+                depth += 1
+            parent = parent.parent
         return depth
 
     @property
