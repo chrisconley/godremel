@@ -71,15 +71,15 @@ class Writer():
 
     def get_dlevel(self, value):
         depth = self.get_tree_depth()
-        return depth if value else depth -1
+        return depth + 1 if value else depth
 
     def get_tree_depth(self):
         depth = 0
         parent = self.parent
         while parent:
-            depth += 1
             parent = parent.parent
-        return depth
+            depth += 1
+        return depth - 1
 
     @property
     def path(self):
@@ -98,13 +98,20 @@ class Decoder():
 
     @property
     def fields(self):
-        print self.schema
         return self.schema.fields
+
+    def field_values(self):
+        for field in self.fields:
+            if field.mode == 'repeated' and self.get_value(field.name):
+                for value in self.get_value(field.name):
+                    yield field, value
+            else:
+                yield field, self.get_value(field.name)
 
     def get_value(self, field_id):
         # Need to change this depending on whether value is atomic or not?
         # Or will we never have a decoder with an atomic value?
-        return self.record.get(field_id)
+        return self.record and self.record.get(field_id)
 
 # dlevel = how many fields optional or repeated fields are actually present
 # rlevel = The level of the last repeated field
@@ -118,7 +125,7 @@ def stripe_record(decoder, writer, rlevel=0):
     # add current definition and repetition level to writer (something to do with version maybe)?
     seen_fields = set()
 
-    for field in decoder.fields:
+    for field, value in decoder.field_values(): # in field *values*?!
         child_writer = Writer(parent=writer, field_id=field.name) # child of `writer` for field read by `decoder`
         child_rlevel = rlevel
         if child_writer.field_id in seen_fields:
@@ -127,12 +134,10 @@ def stripe_record(decoder, writer, rlevel=0):
             seen_fields.add(child_writer.field_id)
 
         if field.type != 'record':
-            # How to we handle repeated atomic values?
-            child_writer.write(decoder.get_value(field.name), child_rlevel)
+            child_writer.write(value, child_rlevel)
         else:
             child_schema = findit(field.name, decoder.schema.fields)
-            print child_schema
-            child_decoder = Decoder(child_schema, decoder.get_value(field.name))
+            child_decoder = Decoder(child_schema, value)
             stripe_record(child_decoder, child_writer, child_rlevel)
 
 
@@ -165,7 +170,12 @@ if __name__ == '__main__':
         }
     }
 
+    r3 = {
+        'id': 30,
+    }
+
     print stripe_record(Decoder(schema, r1), Writer())
     print '````'
-
     print stripe_record(Decoder(schema, r2), Writer())
+    print '````'
+    print stripe_record(Decoder(schema, r3), Writer())
