@@ -1,5 +1,5 @@
 import re
-from collections import namedtuple
+from collections import namedtuple, defaultdict
 # procedure DissectRecord(RecordDecoder decoder, FieldWriter writer, int repetitionLevel):
 #     Add current repetitionLevel and definition level to writer
 #
@@ -24,6 +24,8 @@ from collections import namedtuple
 #     end while
 # end procedure
 
+columns = defaultdict(list)
+
 
 class Writer():
     def __init__(self, parent=None, field_id='__base__', actually_present=False):
@@ -32,8 +34,8 @@ class Writer():
         self.actually_present = actually_present # Is this field optional or repeated and actually present
 
     def write(self, value, rlevel):
-        print self.path
-        print (value, rlevel, self.get_dlevel(value))
+        column = (value, rlevel, self.get_dlevel(value))
+        columns[self.path].append(column)
 
     def get_dlevel(self, value):
         depth = self.get_tree_depth()
@@ -49,12 +51,13 @@ class Writer():
         return depth
 
     def get_full_tree_depth(self):
-        depth = 0
+        depth = 1 # for self
         parent = self.parent
         while parent:
             parent = parent.parent
-            depth += 1
-        return depth - 1
+            if parent:
+                depth += 1
+        return depth
 
     @property
     def path(self):
@@ -125,6 +128,14 @@ if __name__ == '__main__':
                 Field('forward', int, 'repeated', None),
                 Field('backward', int, 'repeated', None),
             ]),
+            Field('names', 'record', 'repeated', [
+                Field('languages', 'record', 'repeated', [
+                    Field('code', str, 'required', None),
+                    Field('country', str, 'optional', None)
+                ]),
+                Field('url', str, 'optional', None)
+            ])
+
         ]
     )
 
@@ -132,7 +143,24 @@ if __name__ == '__main__':
         'id': 10,
         'links' : {
             'forward': [20, 40, 60]
-        }
+        },
+        'names': [
+            {
+                'languages': [
+                    {'code': 'en-us', 'country': 'us'},
+                    {'code': 'en'}
+                ],
+                'url': 'http://A'
+            },
+            {
+                'url': 'http://B'
+            },
+            {
+                'languages': [
+                    {'code': 'en-gb', 'country': 'en'}
+                ]
+            }
+        ]
     }
 
     r2 = {
@@ -140,15 +168,19 @@ if __name__ == '__main__':
         'links' : {
             'backward': [10, 30],
             'forward': [80]
-        }
+        },
+        'names': [
+            {'url': 'http://C'}
+        ]
     }
 
     r3 = {
         'id': 30,
     }
 
-    print stripe_record(Decoder(schema, r1), Writer())
-    print '````'
-    print stripe_record(Decoder(schema, r2), Writer())
-    print '````'
-    print stripe_record(Decoder(schema, r3), Writer())
+    stripe_record(Decoder(schema, r1), Writer())
+    stripe_record(Decoder(schema, r2), Writer())
+    for path, entries in columns.iteritems():
+        print path
+        for e in entries:
+            print e
