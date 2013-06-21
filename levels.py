@@ -28,10 +28,17 @@ columns = defaultdict(list)
 
 
 class Writer():
-    def __init__(self, parent=None, field_id='__base__', actually_present=False):
+    def __init__(self, parent=None, field=None, value=None):
         self.parent = parent
-        self.field_id = field_id
-        self.actually_present = actually_present # Is this field optional or repeated and actually present
+        self.field = field
+        self.field_id = field.name
+        self.value = value
+
+        # Is this field optional or repeated and actually present
+        self.actually_present= (field.mode != 'required' and value)
+
+        # Is this a repeated field
+        self.repeated = field.mode == 'repeated'
 
     def write(self, value, rlevel):
         column = (value, rlevel, self.get_dlevel(value))
@@ -50,13 +57,25 @@ class Writer():
             parent = parent.parent
         return depth
 
-    def get_full_tree_depth(self):
+    def get_repeated_field_depth(self):
         depth = 1 # for self
+        #depth = 1 if self.repeated else 0
         parent = self.parent
         while parent:
-            parent = parent.parent
-            if parent:
+            if parent and parent.repeated:
                 depth += 1
+            parent = parent.parent
+        return depth
+
+    def get_full_tree_depth(self):
+        #depth = 1 # for self
+        depth = 0
+        parent = self.parent
+        while parent:
+            parent = parent.parent and parent.mode == 'repeated'
+            #if parent:
+                #depth += 1
+            depth += 1
         return depth
 
     @property
@@ -102,10 +121,10 @@ def stripe_record(decoder, writer, rlevel=0):
     seen_fields = set()
 
     for field, value in decoder.field_values():
-        child_writer = Writer(parent=writer, field_id=field.name, actually_present=(field.mode != 'required' and value))
+        child_writer = Writer(parent=writer, field=field, value=value)
         child_rlevel = rlevel
         if child_writer.field_id in seen_fields:
-            child_rlevel = child_writer.get_full_tree_depth()
+            child_rlevel = child_writer.get_repeated_field_depth()
         else:
             seen_fields.add(child_writer.field_id)
 
@@ -178,8 +197,8 @@ if __name__ == '__main__':
         'id': 30,
     }
 
-    stripe_record(Decoder(schema, r1), Writer())
-    stripe_record(Decoder(schema, r2), Writer())
+    stripe_record(Decoder(schema, r1), Writer(field=schema))
+    stripe_record(Decoder(schema, r2), Writer(field=schema))
     for path, entries in columns.iteritems():
         print path
         for e in entries:
