@@ -25,45 +25,11 @@ from collections import namedtuple
 # end procedure
 
 
-def disect_record(record, schema, columns, rlevel=0):
-    seen_fields = set()
-    for key, child_schema in schema.iteritems():
-        path = child_schema.get('path')
-        child_rlevel = rlevel
-
-        if child_schema['type'] == int:
-            record_value = record.get(path)
-
-            if re.search('\.', path):
-                dlevel = len(path.split('.'))
-                dlevel = dlevel if record_value else dlevel - 1
-            else:
-                dlevel = 0
-            column = (record_value, child_rlevel, dlevel)
-            if record_value:
-                if child_schema.get('repeated'):
-                    for val in record_value:
-                        if path in seen_fields:
-                            child_rlevel = rlevel +  1
-                        else:
-                            seen_fields.add(path)
-                        column = (val, child_rlevel, dlevel)
-                        columns[path].append(column)
-                else:
-                    columns[path].append(column)
-            else:
-                columns[path].append((None, child_rlevel, dlevel))
-
-
-        if child_schema['type'] == 'group':
-            disect_record(record, child_schema['children'], columns, child_rlevel)
-
-    return columns
-
 class Writer():
-    def __init__(self, parent=None, field_id='__base__'):
+    def __init__(self, parent=None, field_id='__base__', actually_present=False):
         self.parent = parent
         self.field_id = field_id
+        self.actually_present = actually_present # Is this field optional or repeated and actually present
 
     def write(self, value, rlevel):
         print self.path
@@ -71,9 +37,18 @@ class Writer():
 
     def get_dlevel(self, value):
         depth = self.get_tree_depth()
-        return depth + 1 if value else depth
+        return depth + 1 if self.actually_present else depth
 
     def get_tree_depth(self):
+        depth = 0
+        parent = self.parent
+        while parent:
+            if parent and parent.actually_present:
+                depth += 1
+            parent = parent.parent
+        return depth
+
+    def get_full_tree_depth(self):
         depth = 0
         parent = self.parent
         while parent:
@@ -109,8 +84,6 @@ class Decoder():
                 yield field, self.get_value(field.name)
 
     def get_value(self, field_id):
-        # Need to change this depending on whether value is atomic or not?
-        # Or will we never have a decoder with an atomic value?
         return self.record and self.record.get(field_id)
 
 # dlevel = how many fields optional or repeated fields are actually present
@@ -125,11 +98,11 @@ def stripe_record(decoder, writer, rlevel=0):
     # add current definition and repetition level to writer (something to do with version maybe)?
     seen_fields = set()
 
-    for field, value in decoder.field_values(): # in field *values*?!
-        child_writer = Writer(parent=writer, field_id=field.name) # child of `writer` for field read by `decoder`
+    for field, value in decoder.field_values():
+        child_writer = Writer(parent=writer, field_id=field.name, actually_present=(field.mode != 'required' and value))
         child_rlevel = rlevel
         if child_writer.field_id in seen_fields:
-            child_rlevel = child_writer.get_tree_depth()
+            child_rlevel = child_writer.get_full_tree_depth()
         else:
             seen_fields.add(child_writer.field_id)
 
