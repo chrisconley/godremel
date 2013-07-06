@@ -42,7 +42,13 @@ func construct(fields [2]Field) map[FsmState]Field {
         // for each preField before field whose repetition level is larger than barrierLevel:
         // Walk each prefield starting with the most recent field
         for preFieldIndex := fieldIndex-1; preFieldIndex >= 0; preFieldIndex-- {
-            fmt.Printf("preFieldIndex: %s\n", preFieldIndex)
+            preField := fields[preFieldIndex]
+            if preField.maxRepetitionLevel > barrierLevel {
+              backLevel := commonRepetitionLevel(field, preField)
+              state := FsmState{field, backLevel}
+              transitions[state] = preField
+            }
+            fmt.Printf("preFieldIndex: %d\n", preFieldIndex)
         }
 
         // for each level in [barrierLevel+1..maxLevel] that lacks transition from field:
