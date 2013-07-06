@@ -106,7 +106,7 @@ class Decoder():
         return self.record and self.record.get(field_id)
 
 # dlevel = how many fields optional or repeated fields are actually present
-# rlevel = The level of the last repeated field
+# rlevel = The level of the last field with mode = 'repeated'
 
 def findit(field_id, fields):
     matches = [f for f in fields if f.name == field_id]
@@ -200,3 +200,5 @@ if __name__ == '__main__':
         print path
         for e in entries:
             print e
+
+    build_fsm(['names.languages.code', 'names.languages.country', 'name.url'], schema)
