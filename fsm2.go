@@ -1,7 +1,7 @@
 package main
 
 import (
-    //"fmt"
+    "fmt"
     "os"
     "encoding/json"
     "io/ioutil"
@@ -9,19 +9,28 @@ import (
 
 
 type Field struct {
-    name string
-    kind string // int, string, record
-    mode string // optional, repeated
-    fields []Field
+    Name string
+    Kind string // int, string, record
+    Mode string // optional, repeated
+    Fields []Field
 }
 
 type Schema struct {
-  fields []Field
+  Fields []Field
 }
 
 func main() {
 
-  fmt
-  os
-  encoding.json
+  file, e := ioutil.ReadFile("./docs.json")
+  if e != nil {
+      fmt.Printf("File error: %v\n", e)
+      os.Exit(1)
+  }
+
+  var schema Schema
+  err := json.Unmarshal(file, &schema)
+  if err != nil {
+    fmt.Println("error:", err)
+  }
+  fmt.Printf("%s\n", schema)
 }

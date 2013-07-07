@@ -1,16 +1,16 @@
 {
-  "fields": [
-    {"name": "id", "kind": "int", "mode": "required"},
-    {"name": "links", "kind": "record", "mode": "optional", "fields": [
-      {"name": "forward", "kind": "string", "mode": "repeated"},
-      {"name": "backward", "kind": "string", "mode": "repeated"}
+  "Fields": [
+    {"Name": "id", "Kind": "int", "Mode": "required"},
+    {"Name": "links", "Kind": "record", "Mode": "optional", "Fields": [
+      {"Name": "forward", "Kind": "string", "Mode": "repeated"},
+      {"Name": "backward", "Kind": "string", "Mode": "repeated"}
     ]},
-    {"name": "names", "kind": "record", "mode": "repeated", "fields": [
-      {"name": "languages", "kind": "record", "mode": "repeated", "fields": [
-        {"name": "code", "kind": "string", "mode": "required"},
-        {"name": "country", "kind": "string", "mode": "optional"}
+    {"Name": "names", "Kind": "record", "Mode": "repeated", "Fields": [
+      {"Name": "languages", "Kind": "record", "Mode": "repeated", "Fields": [
+        {"Name": "code", "Kind": "string", "Mode": "required"},
+        {"Name": "country", "Kind": "string", "Mode": "optional"}
       ]},
-      {"name": "url", "kind": "string", "mode": "optional"}
+      {"Name": "url", "Kind": "string", "Mode": "optional"}
     ]}
   ]
 
