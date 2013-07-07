@@ -19,18 +19,19 @@ type Field struct {
 type ProcessedField struct {
     Name string
     //Path string
-    //Parent *ProcessedField
+    Parent *ProcessedField
 }
 
 type Schema struct {
   Fields []Field
 }
 
-func processFields(fields []Field, processedFields []ProcessedField) []ProcessedField {
+func processFields(fields []Field, processedFields []ProcessedField, parent ProcessedField) []ProcessedField {
   for _, field := range fields {
-    processedFields = append(processedFields, ProcessedField{field.Name})
+    processedField := ProcessedField{field.Name, &parent}
+    processedFields = append(processedFields, processedField)
     if field.Fields != nil {
-      processedFields = processFields(field.Fields, processedFields)
+      processedFields = processFields(field.Fields, processedFields, processedField)
     }
   }
   return processedFields
@@ -50,5 +51,5 @@ func main() {
     fmt.Println("error:", err)
   }
   //fmt.Printf("%s\n", schema.Fields)
-  fmt.Printf("%s\n", processFields(schema.Fields, []ProcessedField{}))
+  fmt.Printf("%s\n", processFields(schema.Fields, []ProcessedField{}, ProcessedField{}))
 }
