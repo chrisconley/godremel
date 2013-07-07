@@ -13,10 +13,18 @@ type Field struct {
     Kind string // int, string, record
     Mode string // optional, repeated
     Fields []Field
+    Parent *Field
 }
 
 type Schema struct {
   Fields []Field
+}
+
+func flatten(fields []Field) []Field {
+  var flattenedFields = make([]Field, 100)
+  flattenedFields[0] = fields[0]
+  flattenedFields[1] = fields[1]
+  return flattenedFields
 }
 
 func main() {
@@ -32,5 +40,6 @@ func main() {
   if err != nil {
     fmt.Println("error:", err)
   }
-  fmt.Printf("%s\n", schema)
+  //fmt.Printf("%s\n", schema.Fields)
+  fmt.Printf("%s\n", flatten(schema.Fields))
 }
