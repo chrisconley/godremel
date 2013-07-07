@@ -2,6 +2,7 @@ package main
 
 import (
     "fmt"
+    "strings"
     "os"
     "encoding/json"
     "io/ioutil"
@@ -18,7 +19,7 @@ type Field struct {
 
 type ProcessedField struct {
     Name string
-    //Path string
+    Path string
     Parent *ProcessedField
 }
 
@@ -28,7 +29,15 @@ type Schema struct {
 
 func processFields(fields []Field, processedFields []ProcessedField, parent ProcessedField) []ProcessedField {
   for _, field := range fields {
-    processedField := ProcessedField{field.Name, &parent}
+
+    path := ""
+    if parent.Path != "" {
+      path = strings.Join([]string{parent.Path, field.Name}, ".")
+    } else {
+      path = field.Name
+    }
+
+    processedField := ProcessedField{field.Name, path, &parent}
     processedFields = append(processedFields, processedField)
     if field.Fields != nil {
       processedFields = processFields(field.Fields, processedFields, processedField)
@@ -50,6 +59,8 @@ func main() {
   if err != nil {
     fmt.Println("error:", err)
   }
-  //fmt.Printf("%s\n", schema.Fields)
-  fmt.Printf("%s\n", processFields(schema.Fields, []ProcessedField{}, ProcessedField{}))
+  pFields := processFields(schema.Fields, []ProcessedField{}, ProcessedField{})
+  for _, pField := range pFields {
+    fmt.Printf("%v\n", pField)
+  }
 }
