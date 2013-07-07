@@ -14,13 +14,14 @@ type Field struct {
     Kind string // int, string, record
     Mode string // optional, repeated
     Fields []Field
-    Parent *Field
 }
 
 type ProcessedField struct {
-    Name string
+    Name string // get rid of this?
     Path string
     Parent *ProcessedField
+    // will have to add Mode on here, then we can write functions to get max Repetition and Definition level
+    // Do we need Kind?
 }
 
 type Schema struct {
