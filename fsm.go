@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-type Field struct {
+type Field1 struct {
     path string
     maxRepetitionLevel int
 }
@@ -62,7 +62,7 @@ func construct(fields [2]Field) map[FsmState]Field {
     return transitions
 }
 
-func main() {
+func main1() {
     var fields [2]Field
     fields[0] = Field{"id", 0}
     fields[1] = Field{"names.languages.country", 2}

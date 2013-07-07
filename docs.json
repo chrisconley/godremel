@@ -1,0 +1,17 @@
+{
+  "fields": [
+    {"name": "id", "kind": "int", "mode": "required"},
+    {"name": "links", "kind": "record", "mode": "optional", "fields": [
+      {"name": "forward", "kind": "string", "mode": "repeated"},
+      {"name": "backward", "kind": "string", "mode": "repeated"}
+    ]},
+    {"name": "names", "kind": "record", "mode": "repeated", "fields": [
+      {"name": "languages", "kind": "record", "mode": "repeated", "fields": [
+        {"name": "code", "kind": "string", "mode": "required"},
+        {"name": "country", "kind": "string", "mode": "optional"}
+      ]},
+      {"name": "url", "kind": "string", "mode": "optional"}
+    ]}
+  ]
+
+}
