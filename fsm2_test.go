@@ -1,15 +1,16 @@
-package fsm2
+package go_dremel
 
 import (
-    //. "fsm2"
-    "testing"
-)
+    "fmt"
+    "testing" //import go package for testing related functionality
+    )
 
 func TestSqrt(t *testing.T) {
-  field1 := fsm2.ProcessedField{}
-  field2 := fsm2.ProcessedField{}
-  result := fsm2.getCommonRepetitionLevel(field1, field2)
-	if result != 1 {
+  fmt.Printf("hi")
+  field1 := ProcessedField{}
+  field2 := ProcessedField{}
+  result := getCommonRepetitionLevel(field1, field2)
+	if result != 2 {
 		t.Errorf("Expected %v to be %v", result, 1)
 	}
 }
