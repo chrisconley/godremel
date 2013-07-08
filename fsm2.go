@@ -28,6 +28,10 @@ type Schema struct {
   Fields []Field
 }
 
+func getCommonRepetitionLevel(f1 ProcessedField, f2 ProcessedField) int {
+  return 1
+}
+
 func processFields(fields []Field, processedFields []ProcessedField, parent ProcessedField) []ProcessedField {
   for _, field := range fields {
 
