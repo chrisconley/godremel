@@ -24,6 +24,16 @@ type ProcessedField struct {
     // Do we need Kind?
 }
 
+func (processedField *ProcessedField) Ancestors() []ProcessedField {
+    ancestors := []ProcessedField{}
+    parent := processedField.Parent
+    for parent != nil {
+      ancestors = append(ancestors, *parent)
+      parent = parent.Parent
+    }
+    return ancestors
+}
+
 type Schema struct {
   Fields []Field
 }
