@@ -12,7 +12,7 @@ func TestSqrt(t *testing.T) {
   field1 := ProcessedField{}
   field2 := ProcessedField{}
   result := getCommonRepetitionLevel(field1, field2)
-	if result != 2 {
+	if result != 1 {
 		t.Errorf("Expected %v to be %v", result, 1)
 	}
 }
@@ -33,5 +33,13 @@ func TestAncestors(t *testing.T) {
     fmt.Printf("%v\n", pField)
   }
 
-  fmt.Printf("%v\n", pFields[6].Ancestors())
+  ancestors := pFields[6].Ancestors()
+  fmt.Printf("%v\n", ancestors)
+
+  if ancestors[0].Path != "names.languages" || ancestors[1].Path != "names" {
+    t.Errorf("Ancestor error: %v\n", ancestors)
+  }
 }
+
+
+// Trying generic collect function: http://play.golang.org/p/5Osey24Itz
