@@ -25,13 +25,13 @@ type ProcessedField struct {
 }
 
 func (processedField *ProcessedField) Ancestors() []ProcessedField {
-    ancestors := []ProcessedField{}
     parent := processedField.Parent
-    for parent != nil {
-      ancestors = append(ancestors, *parent)
-      parent = parent.Parent
+    if parent != nil && parent.Name != "" {
+      ancestors := []ProcessedField{*parent}
+      return append(ancestors, parent.Ancestors()...)
+    } else {
+      return []ProcessedField{}
     }
-    return ancestors
 }
 
 type Schema struct {

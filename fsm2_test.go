@@ -36,6 +36,10 @@ func TestAncestors(t *testing.T) {
   ancestors := pFields[6].Ancestors()
   fmt.Printf("%v\n", ancestors)
 
+  if len(ancestors) != 2 {
+    t.Errorf("Ancestor error: %v\n", ancestors)
+  }
+
   if ancestors[0].Path != "names.languages" || ancestors[1].Path != "names" {
     t.Errorf("Ancestor error: %v\n", ancestors)
   }
