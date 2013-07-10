@@ -13,12 +13,12 @@ type Row struct {
   D int
 }
 
-func MakeReaders(columns map[string][]Row, fields []ProcessedField, fsm FSM2) []Reader {
-  readers := []Reader{}
+func MakeReaders(columns map[string][]Row, fields []ProcessedField, fsm FSM2) []*Reader {
+  readers := []*Reader{}
 
   for _, field := range fields {
     reader := Reader{field, columns[field.Path], fsm[field], 0}
-    readers = append(readers, reader)
+    readers = append(readers, &reader)
   }
 
   return readers
@@ -62,28 +62,31 @@ func (reader *Reader) NextRow() Row {
 
 func (reader *Reader) NextRepetionLevel() int {
   nextRow := reader.NextRow()
+  fmt.Printf("NextRow: %v\n", reader.NextRow())
   return nextRow.RepetitionLevel
 }
 
-func findReaderByField(field ProcessedField, readers []Reader) *Reader {
+func findReaderByField(field ProcessedField, readers []*Reader) *Reader {
   reader := &Reader{}
   for i := 0; i < len(readers); i++ {
     r := readers[i]
     if r.Field == field {
-      reader = &r
+      reader = r
     }
   }
   return reader
 }
 
 
-func (reader *Reader) NextReader(readers []Reader) *Reader {
+func (reader *Reader) NextReader(readers []*Reader) *Reader {
     destinationField := reader.FSM[reader.NextRepetionLevel()]
+    fmt.Printf("NextRepetionLevel: %v\n", reader.NextRepetionLevel())
     destinationReader := findReaderByField(destinationField, readers)
+    fmt.Printf("destinationReader: %v\n", destinationReader)
     return destinationReader
 }
 
-func AssembleRecord(readers []Reader) Record {
+func AssembleRecord(readers []*Reader) Record {
   record := Record{}
 
   //for i := 0; i < len(readers); i++ {
@@ -98,6 +101,8 @@ func AssembleRecord(readers []Reader) Record {
 
   counter := 0
   reader := readers[0]
+  fmt.Printf("~~~initreader: %v\n", reader)
+  fmt.Printf("&&&initreader: %p\n", &reader)
 
   for reader.HasData() && counter < 20 {
     counter++
@@ -112,7 +117,7 @@ func AssembleRecord(readers []Reader) Record {
     } else {
       //lastReader = moveToLevel(reader.FullDefinitionLevel(), reader, lastReader)
     }
-    reader = *reader.NextReader(readers)
+    reader = reader.NextReader(readers)
     //lastReader = returnToLevel(reader.TreeLevel(), reader, lastReader)
   }
   //lastReader = returnToLevel(0)
