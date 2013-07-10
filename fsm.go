@@ -5,18 +5,19 @@ type FsmState struct {
   repetitionLevel int
 }
 
-type FieldRepetitionLevelTransitions map[RepetitionLevel]ProcessedField
+type FieldRepetitionLevelTransitions map[int]ProcessedField
 type FSM2 map[ProcessedField]FieldRepetitionLevelTransitions
 
 type FSM map[FsmState]ProcessedField
 
 var EndField = ProcessedField{"end", "", "", &ProcessedField{}}
 
-func ConstructFSM(fields []ProcessedField) FSM {
-    fsm := FSM{}
+func ConstructFSM(fields []ProcessedField) FSM2 {
+    fsm := FSM2{}
 
     for fieldIndex, field := range fields {
         maxLevel := field.MaxRepetitionLevel()
+        fsm[field] = FieldRepetitionLevelTransitions{}
 
         // Set the barrier to the next field
         // if there there is still a next field
@@ -33,22 +34,21 @@ func ConstructFSM(fields []ProcessedField) FSM {
             preField := fields[preFieldIndex]
             if preField.MaxRepetitionLevel() > barrierLevel {
               backLevel := GetCommonRepetitionLevel(field, preField)
-              state := FsmState{field, backLevel}
-              fsm[state] = preField
+              fsm[field][backLevel] = preField
             }
         }
 
         // for each level in [barrierLevel+1..maxLevel] that lacks transition from field:
         for level := barrierLevel+1; level <= maxLevel; level++ {
-          if _, present := fsm[FsmState{field, level}]; !present {
+          if _, present := fsm[field][level]; !present {
             //fsm[FsmState{field, level}] = fsm[FsmState{field, level - 1}]
-            fsm[FsmState{field, level}] = field // The whitepaper says get field from level-1, but this works
+            fsm[field][level] = field // The whitepaper says get field from level-1, but this works
           }
         }
 
         // for each level in [0..barrierLevel], move to barrier (next field)
         for level := 0; level <= barrierLevel; level++ {
-          fsm[FsmState{field, level}] = barrier
+          fsm[field][level] = barrier
         }
     }
 

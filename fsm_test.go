@@ -7,9 +7,9 @@ import (
     "encoding/json"
     )
 
-func assertFsmTransition(fsm FSM, state FsmState, destination ProcessedField) (bool, string) {
-  if fsm[state] != destination {
-    return false, fmt.Sprintf("Expected %v to be %v, but it was %v\n", state, destination, fsm[state])
+func assertFsmTransition(fsm FSM2, currentField ProcessedField, rLevel int, destination ProcessedField) (bool, string) {
+  if fsm[currentField][rLevel] != destination {
+    return false, fmt.Sprintf("Expected (%v, %v) to be %v, but it was %v\n", currentField, rLevel, destination, fsm[currentField][rLevel])
   } else {
     return true, ""
   }
@@ -33,19 +33,19 @@ func TestConstructFSMMimimum(t *testing.T) {
   fsm := ConstructFSM(fields)
 
   //idField
-  if fsm[FsmState{idField, 0}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, idField, 0, countryField); !exists {
+    t.Errorf(err)
   }
 
   //countryField
-  if fsm[FsmState{countryField, 1}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 1, countryField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{countryField, 2}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 2, countryField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{countryField, 0}] != EndField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 0, EndField); !exists {
+    t.Errorf(err)
   }
 }
 
@@ -68,30 +68,30 @@ func TestConstructFSMPartial(t *testing.T) {
   fsm := ConstructFSM(fields)
 
   //idField
-  if fsm[FsmState{idField, 0}] != codeField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, idField, 0, codeField); !exists {
+    t.Errorf(err)
   }
 
   //codeField
-  if fsm[FsmState{codeField, 0}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, codeField, 0, countryField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{codeField, 1}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, codeField, 1, countryField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{codeField, 2}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, codeField, 2, countryField); !exists {
+    t.Errorf(err)
   }
 
   //countryField
-  if fsm[FsmState{countryField, 2}] != codeField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 2, codeField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{countryField, 1}] != countryField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 1, countryField); !exists {
+    t.Errorf(err)
   }
-  if fsm[FsmState{countryField, 0}] != EndField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, countryField, 0, EndField); !exists {
+    t.Errorf(err)
   }
 }
 
@@ -119,53 +119,53 @@ func TestConstructFSMFull(t *testing.T) {
   fsm := ConstructFSM(fields)
 
   //idField
-  if fsm[FsmState{idField, 0}] != backwardField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, idField, 0, backwardField); !exists {
+    t.Errorf(err)
   }
 
   //backwardField
-  if fsm[FsmState{backwardField, 1}] != backwardField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, backwardField, 1, backwardField); !exists {
+    t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{backwardField, 0}, forwardField); !exists {
+  if exists, err := assertFsmTransition(fsm, backwardField, 0, forwardField); !exists {
     t.Errorf(err)
   }
 
   //forwardField
-  if fsm[FsmState{forwardField, 1}] != forwardField {
-    t.Errorf("hi")
+  if exists, err := assertFsmTransition(fsm, forwardField, 1, forwardField); !exists {
+    t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{forwardField, 0}, codeField); !exists {
+  if exists, err := assertFsmTransition(fsm, forwardField, 0, codeField); !exists {
     t.Errorf(err)
   }
 
   //codeField
-  if exists, err := assertFsmTransition(fsm, FsmState{codeField, 0}, countryField); !exists {
+  if exists, err := assertFsmTransition(fsm, codeField, 0, countryField); !exists {
     t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{codeField, 1}, countryField); !exists {
+  if exists, err := assertFsmTransition(fsm, codeField, 1, countryField); !exists {
     t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{codeField, 2}, countryField); !exists {
+  if exists, err := assertFsmTransition(fsm, codeField, 2, countryField); !exists {
     t.Errorf(err)
   }
 
   //countryField
-  if exists, err := assertFsmTransition(fsm, FsmState{countryField, 2}, codeField); !exists {
+  if exists, err := assertFsmTransition(fsm, countryField, 2, codeField); !exists {
     t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{countryField, 0}, urlField); !exists {
+  if exists, err := assertFsmTransition(fsm, countryField, 0, urlField); !exists {
     t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{countryField, 1}, urlField); !exists {
+  if exists, err := assertFsmTransition(fsm, countryField, 1, urlField); !exists {
     t.Errorf(err)
   }
 
   //urlField
-  if exists, err := assertFsmTransition(fsm, FsmState{urlField, 1}, codeField); !exists {
+  if exists, err := assertFsmTransition(fsm, urlField, 1, codeField); !exists {
     t.Errorf(err)
   }
-  if exists, err := assertFsmTransition(fsm, FsmState{urlField, 0}, EndField); !exists {
+  if exists, err := assertFsmTransition(fsm, urlField, 0, EndField); !exists {
     t.Errorf(err)
   }
 }
