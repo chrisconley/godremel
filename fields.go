@@ -1,11 +1,7 @@
 package go_dremel
 
 import (
-    "fmt"
     "strings"
-    "os"
-    "encoding/json"
-    "io/ioutil"
 )
 
 
@@ -58,11 +54,30 @@ func findField (path string, fields []ProcessedField) ProcessedField {
   return returnField
 }
 
+func makeStringSet (strings []string) map[string]bool {
+  set := map[string]bool{}
+  for _, s := range strings {
+    set[s] = true
+  }
+  return set
+}
+
+func findFields (fields []ProcessedField, paths ...string) []ProcessedField {
+  pathSet := makeStringSet(paths)
+  returnFields := []ProcessedField{}
+  for _, field := range fields {
+    if pathSet[field.Path] {
+      returnFields = append(returnFields, field)
+    }
+  }
+  return returnFields
+}
+
 type Schema struct {
   Fields []Field
 }
 
-func getCommonRepetitionLevel(f1 ProcessedField, f2 ProcessedField) int {
+func GetCommonRepetitionLevel(f1 ProcessedField, f2 ProcessedField) int {
   commonAncestors := []ProcessedField{}
   for _, a1 := range f1.Ancestors() {
     a2 := findField(a1.Path, f2.Ancestors())
@@ -98,23 +113,4 @@ func processFields(fields []Field, processedFields []ProcessedField, parent Proc
     }
   }
   return processedFields
-}
-
-func main() {
-
-  file, e := ioutil.ReadFile("./docs.json")
-  if e != nil {
-      fmt.Printf("File error: %v\n", e)
-      os.Exit(1)
-  }
-
-  var schema Schema
-  err := json.Unmarshal(file, &schema)
-  if err != nil {
-    fmt.Println("error:", err)
-  }
-  pFields := processFields(schema.Fields, []ProcessedField{}, ProcessedField{})
-  for _, pField := range pFields {
-    fmt.Printf("%v\n", pField)
-  }
 }

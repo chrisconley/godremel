@@ -1,54 +1,43 @@
-package main
+package go_dremel
 
 import "fmt"
 
-type Field1 struct {
-    path string
-    maxRepetitionLevel int
-}
-
 type FsmState struct {
-  field Field
+  field ProcessedField
   repetitionLevel int
 }
 
-// common repetition level of field and barrier
-func commonRepetitionLevel(field Field, barrier Field) int {
-  if field.maxRepetitionLevel > barrier.maxRepetitionLevel {
-    return barrier.maxRepetitionLevel
-  } else {
-    return field.maxRepetitionLevel
-  }
-}
-
-func construct(fields [2]Field) map[FsmState]Field {
-    var transitions map[FsmState]Field
+func ConstructFSM(fields []ProcessedField) map[FsmState]ProcessedField {
+    transitions := map[FsmState]ProcessedField{}
 
     for fieldIndex, field := range fields {
         fmt.Printf("%s\n", field)
-        maxLevel := field.maxRepetitionLevel
+        maxLevel := field.MaxRepetitionLevel()
 
         // Set the barrier to the next field
         // if there there is still a next field
         numFields := len(fields)
-        barrier := Field{"end", 0}
+        barrier := ProcessedField{"end", "", "", &ProcessedField{}}
         if fieldIndex+1 < numFields {
           barrier = fields[fieldIndex+1]
         }
 
-        barrierLevel := commonRepetitionLevel(field, barrier)
+        barrierLevel := GetCommonRepetitionLevel(field, barrier)
 
 
         // for each preField before field whose repetition level is larger than barrierLevel:
         // Walk each prefield starting with the most recent field
         for preFieldIndex := fieldIndex-1; preFieldIndex >= 0; preFieldIndex-- {
             preField := fields[preFieldIndex]
-            if preField.maxRepetitionLevel > barrierLevel {
-              backLevel := commonRepetitionLevel(field, preField)
+            if preField.MaxRepetitionLevel() > barrierLevel {
+              backLevel := GetCommonRepetitionLevel(field, preField)
               state := FsmState{field, backLevel}
+              fmt.Printf("preField %v\n", preField)
               transitions[state] = preField
             }
             fmt.Printf("preFieldIndex: %d\n", preFieldIndex)
+            fmt.Printf("preField.MaxRepetitionLevel: %d\n", preField.MaxRepetitionLevel())
+            fmt.Printf("barrier level: %d\n", barrierLevel)
         }
 
         // for each level in [barrierLevel+1..maxLevel] that lacks transition from field:
@@ -60,15 +49,4 @@ func construct(fields [2]Field) map[FsmState]Field {
     }
 
     return transitions
-}
-
-func main1() {
-    var fields [2]Field
-    fields[0] = Field{"id", 0}
-    fields[1] = Field{"names.languages.country", 2}
-
-    m := construct(fields)
-
-    fmt.Printf("fsm: %v\n", m)
-    fmt.Printf("hello, world\n")
 }

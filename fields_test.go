@@ -24,7 +24,6 @@ func TestAncestors(t *testing.T) {
   }
 
   ancestors := pFields[6].Ancestors()
-  fmt.Printf("%v\n", ancestors)
 
   if len(ancestors) != 2 {
     t.Errorf("Ancestor error: %v\n", ancestors)
@@ -72,12 +71,12 @@ func TestGetCommonRepetitionLevel(t * testing.T) {
 
   rLevel := 0
 
-  rLevel = getCommonRepetitionLevel(codeField, countryField)
+  rLevel = GetCommonRepetitionLevel(codeField, countryField)
   if rLevel != 2 {
     t.Errorf("Repetition level error: %v\n", rLevel)
   }
 
-  rLevel = getCommonRepetitionLevel(codeField, urlField)
+  rLevel = GetCommonRepetitionLevel(codeField, urlField)
   if rLevel != 1 {
     t.Errorf("Repetition level error: %v\n", rLevel)
   }
