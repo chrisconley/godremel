@@ -1,7 +1,7 @@
 package go_dremel
 
 import (
-    "fmt"
+    //"fmt"
     "testing" //import go package for testing related functionality
     "io/ioutil"
     "encoding/json"
@@ -19,9 +19,9 @@ func TestAncestors(t *testing.T) {
     t.Errorf("Json error: %v\n", err)
   }
   pFields := processFields(schema.Fields, []ProcessedField{}, ProcessedField{})
-  for _, pField := range pFields {
-    fmt.Printf("%v\n", pField)
-  }
+  //for _, pField := range pFields {
+    //fmt.Printf("%v\n", pField)
+  //}
 
   ancestors := pFields[6].Ancestors()
 

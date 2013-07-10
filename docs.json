@@ -2,8 +2,8 @@
   "Fields": [
     {"Name": "id", "Kind": "int", "Mode": "required"},
     {"Name": "links", "Kind": "record", "Mode": "optional", "Fields": [
-      {"Name": "forward", "Kind": "string", "Mode": "repeated"},
-      {"Name": "backward", "Kind": "string", "Mode": "repeated"}
+      {"Name": "backward", "Kind": "string", "Mode": "repeated"},
+      {"Name": "forward", "Kind": "string", "Mode": "repeated"}
     ]},
     {"Name": "names", "Kind": "record", "Mode": "repeated", "Fields": [
       {"Name": "languages", "Kind": "record", "Mode": "repeated", "Fields": [

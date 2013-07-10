@@ -1,29 +1,28 @@
 package go_dremel
 
-import "fmt"
-
 type FsmState struct {
   field ProcessedField
   repetitionLevel int
 }
 
-func ConstructFSM(fields []ProcessedField) map[FsmState]ProcessedField {
-    transitions := map[FsmState]ProcessedField{}
+type FSM map[FsmState]ProcessedField
+
+var EndField = ProcessedField{"end", "", "", &ProcessedField{}}
+
+func ConstructFSM(fields []ProcessedField) FSM {
+    fsm := FSM{}
 
     for fieldIndex, field := range fields {
-        fmt.Printf("%s\n", field)
         maxLevel := field.MaxRepetitionLevel()
 
         // Set the barrier to the next field
         // if there there is still a next field
-        numFields := len(fields)
-        barrier := ProcessedField{"end", "", "", &ProcessedField{}}
-        if fieldIndex+1 < numFields {
+        barrier := EndField
+        if fieldIndex+1 < len(fields) {
           barrier = fields[fieldIndex+1]
         }
 
         barrierLevel := GetCommonRepetitionLevel(field, barrier)
-
 
         // for each preField before field whose repetition level is larger than barrierLevel:
         // Walk each prefield starting with the most recent field
@@ -32,21 +31,23 @@ func ConstructFSM(fields []ProcessedField) map[FsmState]ProcessedField {
             if preField.MaxRepetitionLevel() > barrierLevel {
               backLevel := GetCommonRepetitionLevel(field, preField)
               state := FsmState{field, backLevel}
-              fmt.Printf("preField %v\n", preField)
-              transitions[state] = preField
+              fsm[state] = preField
             }
-            fmt.Printf("preFieldIndex: %d\n", preFieldIndex)
-            fmt.Printf("preField.MaxRepetitionLevel: %d\n", preField.MaxRepetitionLevel())
-            fmt.Printf("barrier level: %d\n", barrierLevel)
         }
 
         // for each level in [barrierLevel+1..maxLevel] that lacks transition from field:
+        for level := barrierLevel+1; level <= maxLevel; level++ {
+          if _, present := fsm[FsmState{field, level}]; !present {
+            //fsm[FsmState{field, level}] = fsm[FsmState{field, level - 1}]
+            fsm[FsmState{field, level}] = field // The whitepaper says get field from level-1, but this works
+          }
+        }
 
-
-        // for each level in [0..barrierLevel]:
-
-        fmt.Printf("%d | %s | %d\n", maxLevel, barrier, barrierLevel)
+        // for each level in [0..barrierLevel], move to barrier (next field)
+        for level := 0; level <= barrierLevel; level++ {
+          fsm[FsmState{field, level}] = barrier
+        }
     }
 
-    return transitions
+    return fsm
 }
