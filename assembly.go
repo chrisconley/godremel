@@ -46,26 +46,34 @@ func (reader *Reader) NextRepetionLevel() RepetitionLevel {
   return nextRow.RepetitionLevel
 }
 
+
+func (reader *Reader) NextReader() Reader {
+    //field := fsm[FsmState{reader.field, reader.NextRepetionLevel()}
+    //somehow find reader by field
+    //or change fsm so that states are nested and Reader has its own transitions
+    return Reader{}
+}
+
 func AssembleRecord(readers []Reader) Record {
   record := Record{}
 
   // this isn't right, but I'm not sure what the "root" field reader is
   // Maybe readers[0] is supposed to be for "id", and lastReader is for a "" or "root" reader
-  lastReader := readers[0]
+  //lastReader := readers[0]
 
   reader := readers[0]
 
   for reader.HasData() {
     row := reader.FetchNextRow()
     if row.Value != "" {
-      //moveToLevel(reader.TreeLevel(), reader)
+      //lastReader = moveToLevel(reader.TreeLevel(), reader, lastReader)
       //appendValue(record, reader)
     } else {
-      //moveToLevel(reader.FullDefinitionLevel(), reader)
+      //lastReader = moveToLevel(reader.FullDefinitionLevel(), reader, lastReader)
     }
-
-
-
+    //reader = reader.NextReader()
+    //lastReader = returnToLevel(reader.TreeLevel(), reader, lastReader)
   }
+  //lastReader = returnToLevel(0)
   return record
 }

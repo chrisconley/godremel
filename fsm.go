@@ -5,6 +5,9 @@ type FsmState struct {
   repetitionLevel int
 }
 
+type FieldRepetitionLevelTransitions map[RepetitionLevel]ProcessedField
+type FSM2 map[ProcessedField]FieldRepetitionLevelTransitions
+
 type FSM map[FsmState]ProcessedField
 
 var EndField = ProcessedField{"end", "", "", &ProcessedField{}}
