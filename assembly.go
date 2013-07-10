@@ -11,6 +11,8 @@ type Record struct {
   Name string
   Parent *Record
   Children RecordChildren
+  Value interface{}
+  Values []interface{}
 }
 type RepetitionLevel int
 
@@ -39,6 +41,9 @@ type Reader struct {
   FSM FieldRepetitionLevelTransitions
   CurrentRowIndex int
 }
+
+var EmptyReader = &Reader{}
+
 func (reader *Reader) HasData() bool {
   return reader.Field != ProcessedField{}
 }
@@ -74,7 +79,7 @@ func (reader *Reader) NextRepetionLevel() int {
 }
 
 func findReaderByField(field ProcessedField, readers []*Reader) *Reader {
-  reader := &Reader{}
+  reader := EmptyReader
   for i := 0; i < len(readers); i++ {
     r := readers[i]
     if r.Field == field {
@@ -149,6 +154,7 @@ func returnToLevel(record *Record, nextReader *Reader, lastReader *Reader, lowes
     lastPaths := strings.Split(lastPath, ".")
     fmt.Printf("LowestCommonAncestor Path: %v\n", commonPaths)
     fmt.Printf("Next Path: %v\n", nextPaths)
+    fmt.Printf("Last Path: %v\n", lastPaths)
     fmt.Printf("RECORD: %v\n", record.Name)
 
     // end nested records up to lowest common ancestor of next and last reader
@@ -172,46 +178,48 @@ func getLowestCommonReaderAncestor(r1 *Reader, r2 *Reader, readers []*Reader) *R
   return findReaderByField(commonFieldAncestor, readers)
 }
 
+func appendValue(record *Record, reader *Reader, value string) {
+  if reader.Field.Mode == "repeated" {
+    if record.Values == nil {
+      record.Values = make([]interface{}, 0, 100)
+      record.Values[0] = value
+    } else {
+      record.Values = append(record.Values, value)
+    }
+  } else {
+    record.Value = value
+  }
+}
+
 func AssembleRecord(readers []*Reader) *Record {
   record := &Record{Name: "root", Children:RecordChildren{}}
-  children := RecordChildren{}
-  children[""] = record
-  record.Parent = &Record{Name: "rootroot", Children:children}
 
-  //for i := 0; i < len(readers); i++ {
-    //r := readers[i]
-    //fmt.Printf("READERS: %v\n", r)
-    //fmt.Printf("READERS: %p\n", &r)
-  //}
-
-  // this isn't right, but I'm not sure what the "root" field reader is
-  // Maybe readers[0] is supposed to be for "id", and lastReader is for a "" or "root" reader
-  lastReader := &Reader{}
+  rootReader := EmptyReader
+  lastReader := rootReader
 
   counter := 0
   reader := readers[0]
-  fmt.Printf("~~~initreader: %v\n", reader)
-  fmt.Printf("&&&initreader: %p\n", &reader)
 
   for reader.HasData() && counter < 20 {
     counter++
-    fmt.Printf("~~~reader: %v\n", reader)
-    fmt.Printf("&&&reader: %p\n", &reader)
     row := reader.FetchNextRow()
-    fmt.Printf("@@CurrentRowIndex: %v\n", reader.CurrentRowIndex)
     lowestCommonAncestor := getLowestCommonReaderAncestor(reader, lastReader, readers)
     if row.Value != "" {
       record = moveToLevel(record, reader, lastReader, lowestCommonAncestor)
-      fmt.Printf("%v\n", record)
-      //appendValue(record, reader)
+      appendValue(record, reader, row.Value)
     } else {
       record = moveToLevel(record, reader, lastReader, lowestCommonAncestor)
     }
     reader = reader.NextReader(readers)
-    lowestCommonAncestor = getLowestCommonReaderAncestor(reader, lastReader, readers)
-    record = returnToLevel(record, reader, lastReader, lowestCommonAncestor)
-    fmt.Printf("%v\n", record)
+    if (reader != EmptyReader) {
+      lowestCommonAncestor = getLowestCommonReaderAncestor(reader, lastReader, readers)
+      fmt.Printf("ALMOST FINAL RETURN\n")
+      fmt.Printf("reader%v\n", reader)
+      record = returnToLevel(record, reader, lastReader, lowestCommonAncestor)
+    }
   }
-  //lastReader = returnToLevel(0)
+  fmt.Printf("FINAL RETURN\n")
+  fmt.Printf("~~~lastreader: %v\n", lastReader)
+  record = returnToLevel(record, rootReader, lastReader, EmptyReader)
   return record
 }
