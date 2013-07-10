@@ -13,12 +13,10 @@ type Field struct {
 }
 
 type ProcessedField struct {
-    Name string // get rid of this?
+    Name string
     Path string
     Mode string
     Parent *ProcessedField
-    // will have to add Mode on here, then we can write functions to get max Repetition and Definition level
-    // Do we need Kind?
 }
 
 func (processedField *ProcessedField) Ancestors() []ProcessedField {
