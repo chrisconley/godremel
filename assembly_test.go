@@ -40,7 +40,7 @@ func TestAssembly(t *testing.T) {
      //fmt.Printf("**reader field: %s\n", reader.Field)
   //}
   record := AssembleRecord(readers)
-  fmt.Printf("record: %v\n", record)
+  fmt.Printf("record: %v\n", *record)
   if 1 != 2 {
     t.Errorf("hi")
   }

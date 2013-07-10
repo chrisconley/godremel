@@ -75,15 +75,29 @@ type Schema struct {
   Fields []Field
 }
 
-func GetCommonRepetitionLevel(f1 ProcessedField, f2 ProcessedField) int {
+
+func GetLowestCommonAncestor(f1 ProcessedField, f2 ProcessedField) ProcessedField {
+  commonAncestors := GetCommonAncestors(f1, f2)
+  if len(commonAncestors) >=1 {
+    return commonAncestors[0] // TODO: is this actually the first?
+  } else {
+    return ProcessedField{}
+  }
+}
+
+func GetCommonAncestors(f1 ProcessedField, f2 ProcessedField) []ProcessedField {
   commonAncestors := []ProcessedField{}
   for _, a1 := range f1.Ancestors() {
     a2 := findField(a1.Path, f2.Ancestors())
     if a2.Path != "" {
       commonAncestors = append(commonAncestors, a2)
     }
-
   }
+  return commonAncestors
+}
+
+func GetCommonRepetitionLevel(f1 ProcessedField, f2 ProcessedField) int {
+  commonAncestors := GetCommonAncestors(f1, f2)
 
   maxRepetitionLevel := 0
   for _, a := range commonAncestors {
