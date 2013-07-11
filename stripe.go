@@ -1,9 +1,7 @@
 package go_dremel
 
 import (
-  "fmt"
   "strings"
-  //"reflect"
 )
 
 type FieldValue struct {
@@ -71,10 +69,8 @@ func (writer *Writer) DefinitionLevel() int {
   if writer.Field.Mode != "required" && writer.Value != nil {
     depth++
   }
-  //fmt.Printf("WRITER: %v %v\n", writer.Name, writer.Field.Mode)
   parent := writer.Parent
   for parent.Name != RootWriter.Name {
-    //fmt.Printf("PARENT: %v, %v, %v\n", parent.Name, parent.Field.Mode, parent.Value)
     if parent.Field.Mode != "required" && parent.Value != nil {
       depth++
     }
@@ -95,7 +91,6 @@ func (writer *Writer) Path() string {
 
 func StripeRecord(field Field, record interface{}, datastore DataStore, writer Writer, rLevel int) {
   seenFields := map[string]bool{}
-  //fmt.Printf("RECORD: %v\n", record)
   decoder := Decoder{field, record}
   for fieldValue := range decoder.ReadValues() {
     childWriter := Writer{fieldValue.Field.Name, fieldValue.Field, fieldValue.Value, &writer}
@@ -111,8 +106,6 @@ func StripeRecord(field Field, record interface{}, datastore DataStore, writer W
     if fieldValue.Field.Kind == "record" {
       StripeRecord(fieldValue.Field, fieldValue.Value, datastore, childWriter, childRepetitionLevel)
     } else {
-      fmt.Printf("Field: %v, Value: %v, rLevel: %v, dLevel: %v\n", fieldValue.Field.Name, fieldValue.Value,
-        childRepetitionLevel, childWriter.DefinitionLevel())
       row := Row{childWriter.Value, childRepetitionLevel, childWriter.DefinitionLevel()}
       datastore.WriteRow(childWriter.Path(), row)
     }

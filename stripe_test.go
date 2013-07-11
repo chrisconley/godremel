@@ -7,47 +7,32 @@ import (
     "encoding/json"
     )
 
+func readJson(t *testing.T, filePath string, o interface{}) {
+  file, e := ioutil.ReadFile(filePath)
+  if e != nil {
+      t.Errorf("File error: %v\n", e)
+  }
+
+  err := json.Unmarshal(file, o)
+  if err != nil {
+    t.Errorf("Json error: %v\n", err)
+  }
+}
+
 func TestStripeRecord(t *testing.T) {
-  file, e := ioutil.ReadFile("./docs.json")
-  if e != nil {
-      t.Errorf("File error: %v\n", e)
-  }
-
   var schema Field
-  err := json.Unmarshal(file, &schema)
-  if err != nil {
-    t.Errorf("Json error: %v\n", err)
-  }
-
-  file, e = ioutil.ReadFile("./record1.json")
-  if e != nil {
-      t.Errorf("File error: %v\n", e)
-  }
-
-  var record interface{}
-  err = json.Unmarshal(file, &record)
-  if err != nil {
-    t.Errorf("Json error: %v\n", err)
-  }
+  readJson(t, "./docs.json", &schema)
 
   memstore := MemStore{map[string][]Row{}}
-  StripeRecord(schema, record, &memstore, RootWriter, 0)
 
-
-  file, e = ioutil.ReadFile("./record2.json")
-  if e != nil {
-      t.Errorf("File error: %v\n", e)
-  }
+  var record interface{}
+  readJson(t, "./record1.json", &record)
 
   var record2 interface{}
-  err = json.Unmarshal(file, &record2)
-  if err != nil {
-    t.Errorf("Json error: %v\n", err)
-  }
+  readJson(t, "./record2.json", &record2)
 
+  StripeRecord(schema, record, &memstore, RootWriter, 0)
   StripeRecord(schema, record2, &memstore, RootWriter, 0)
-
-
 
   for c, rows := range memstore.Data {
     fmt.Printf("%v\n", c)
@@ -55,7 +40,16 @@ func TestStripeRecord(t *testing.T) {
       fmt.Printf("%v\n", r)
     }
   }
-  if 1 != 2 {
-    t.Errorf("hi")
+  countryRows := []Row{
+    Row{"us", 0, 3},
+    Row{nil, 2, 2},
+    Row{nil, 1, 1},
+    Row{"gb", 1, 3},
+    Row{nil, 0, 1},
+  }
+  for i := 0; i < len(memstore.Data["names.languages.country"]); i++ {
+    if memstore.Data["names.languages.country"][i] != countryRows[i] {
+      t.Errorf("hi")
+    }
   }
 }
