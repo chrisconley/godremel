@@ -68,7 +68,7 @@ func (writer *Writer) RepeatedFieldDepth() int {
 
 func (writer *Writer) DefinitionLevel() int {
   depth := 0
-  if writer.Field.Mode == "required" && writer.Value != nil {
+  if writer.Field.Mode != "required" && writer.Value != nil {
     depth++
   }
   //fmt.Printf("WRITER: %v %v\n", writer.Name, writer.Field.Mode)

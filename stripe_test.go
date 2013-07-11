@@ -32,6 +32,23 @@ func TestStripeRecord(t *testing.T) {
 
   memstore := MemStore{map[string][]Row{}}
   StripeRecord(schema, record, &memstore, RootWriter, 0)
+
+
+  file, e = ioutil.ReadFile("./record2.json")
+  if e != nil {
+      t.Errorf("File error: %v\n", e)
+  }
+
+  var record2 interface{}
+  err = json.Unmarshal(file, &record2)
+  if err != nil {
+    t.Errorf("Json error: %v\n", err)
+  }
+
+  StripeRecord(schema, record2, &memstore, RootWriter, 0)
+
+
+
   for c, rows := range memstore.Data {
     fmt.Printf("%v\n", c)
     for _, r := range rows {
