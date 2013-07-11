@@ -13,7 +13,7 @@ func TestAssembly(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)

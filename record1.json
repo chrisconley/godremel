@@ -1,22 +1,22 @@
 {
-  'id': 10,
-  'links' : {
-    'forward': [20, 40, 60]
+  "id": 10,
+  "links" : {
+    "forward": [20, 40, 60]
   },
-  'names': [
+  "names": [
     {
-      'languages': [
-        {'code': 'en-us', 'country': 'us'},
-        {'code': 'en'}
+      "languages": [
+        {"code": "en-us", "country": "us"},
+        {"code": "en"}
       ],
-      'url': 'http://A'
+      "url": "http://A"
     },
     {
-      'url': 'http://B'
+      "url": "http://B"
     },
     {
-      'languages': [
-        {'code': 'en-gb', 'country': 'en'}
+      "languages": [
+        {"code": "en-gb", "country": "en"}
       ]
     }
   ]

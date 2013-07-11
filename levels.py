@@ -128,8 +128,7 @@ def stripe_record(decoder, writer, rlevel=0):
         if field.type != 'record':
             child_writer.write(value, child_rlevel)
         else:
-            child_schema = findit(field.name, decoder.schema.fields)
-            child_decoder = Decoder(child_schema, value)
+            child_decoder = Decoder(field, value)
             stripe_record(child_decoder, child_writer, child_rlevel)
 
 
@@ -201,4 +200,4 @@ if __name__ == '__main__':
         for e in entries:
             print e
 
-    build_fsm(['names.languages.code', 'names.languages.country', 'name.url'], schema)
+    #build_fsm(['names.languages.code', 'names.languages.country', 'name.url'], schema)

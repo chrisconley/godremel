@@ -21,7 +21,7 @@ func TestConstructFSMMimimum(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)
@@ -55,7 +55,7 @@ func TestConstructFSMPartial(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)
@@ -102,7 +102,7 @@ func TestConstructFSMFull(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)
