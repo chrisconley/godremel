@@ -1,7 +1,7 @@
 package go_dremel
 
 import (
-    //"fmt"
+    "fmt"
     "testing"
     "io/ioutil"
     "encoding/json"
@@ -30,7 +30,14 @@ func TestStripeRecord(t *testing.T) {
     t.Errorf("Json error: %v\n", err)
   }
 
-  StripeRecord(schema, record, &MemStore{}, RootWriter, 0)
+  memstore := MemStore{map[string][]Row{}}
+  StripeRecord(schema, record, &memstore, RootWriter, 0)
+  for c, rows := range memstore.Data {
+    fmt.Printf("%v\n", c)
+    for _, r := range rows {
+      fmt.Printf("%v\n", r)
+    }
+  }
   if 1 != 2 {
     t.Errorf("hi")
   }

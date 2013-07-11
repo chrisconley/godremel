@@ -2,6 +2,7 @@ package go_dremel
 
 import (
   "fmt"
+  "strings"
   //"reflect"
 )
 
@@ -82,6 +83,16 @@ func (writer *Writer) DefinitionLevel() int {
   return depth
 }
 
+func (writer *Writer) Path() string {
+  path := ""
+  if writer.Parent != nil && writer.Parent.Path() != "" {
+    path = strings.Join([]string{writer.Parent.Path(), writer.Field.Name}, ".")
+  } else {
+    path = writer.Field.Name
+  }
+  return path
+}
+
 func StripeRecord(field Field, record interface{}, datastore DataStore, writer Writer, rLevel int) {
   seenFields := map[string]bool{}
   //fmt.Printf("RECORD: %v\n", record)
@@ -102,6 +113,8 @@ func StripeRecord(field Field, record interface{}, datastore DataStore, writer W
     } else {
       fmt.Printf("Field: %v, Value: %v, rLevel: %v, dLevel: %v\n", fieldValue.Field.Name, fieldValue.Value,
         childRepetitionLevel, childWriter.DefinitionLevel())
+      row := Row{childWriter.Value, childRepetitionLevel, childWriter.DefinitionLevel()}
+      datastore.WriteRow(childWriter.Path(), row)
     }
 
   }

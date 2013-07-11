@@ -162,7 +162,7 @@ func getLowestCommonReaderAncestor(r1 *Reader, r2 *Reader, readers []*Reader) *R
   return findReaderByField(commonFieldAncestor, readers)
 }
 
-func appendValue(record *Record, reader *Reader, value string) {
+func appendValue(record *Record, reader *Reader, value interface{}) {
   if reader.Field.Mode == "repeated" {
     if record.Values == nil {
       record.Values = make([]interface{}, 0, 100)
