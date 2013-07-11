@@ -30,7 +30,7 @@ func TestStripeRecord(t *testing.T) {
     t.Errorf("Json error: %v\n", err)
   }
 
-  StripeRecord(schema, record, &MemStore{})
+  StripeRecord(schema, record, &MemStore{}, RootWriter, 0)
   if 1 != 2 {
     t.Errorf("hi")
   }

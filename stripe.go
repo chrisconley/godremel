@@ -27,18 +27,6 @@ func (decoder *Decoder) ReadValues() chan FieldValue  {
       } else {
         c <- FieldValue{f, recordValue}
       }
-      //switch rType := recordValue.(type) {
-      //case []interface{}:
-        //for _, value := range recordValue.([]interface{}) {
-          //c <- FieldValue{f, value}
-        //}
-      //case interface{}:
-        //c <- FieldValue{f, recordValue}
-      ////case nil:
-        ////c <- FieldValue{f, ""}
-      //default:
-        //fmt.Printf("Mystery Type: %v\n", rType)
-      //}
     }
     close(c)
   }()
@@ -53,16 +41,49 @@ func (decoder *Decoder) getValue(fieldName string) interface{} {
   }
 }
 
-func StripeRecord(field Field, record interface{}, datastore DataStore) {
-  //seenFields := []Field{}
+type Writer struct {
+  Name string
+  Field Field
+  Value interface{}
+  Parent *Writer
+}
+
+var RootWriter = Writer{"__root__", Field{}, nil, nil}
+
+func (writer *Writer) RepeatedFieldDepth() int {
+  depth := 0
+  if writer.Field.Mode == "repeated" {
+    depth++
+  }
+  parent := writer.Parent
+  for parent.Name != RootWriter.Name {
+    if parent.Field.Mode == "repeated" {
+      depth++
+    }
+    parent = parent.Parent
+  }
+  return depth
+}
+
+func StripeRecord(field Field, record interface{}, datastore DataStore, writer Writer, rLevel int) {
+  seenFields := map[string]bool{}
   //fmt.Printf("RECORD: %v\n", record)
   decoder := Decoder{field, record}
   for fieldValue := range decoder.ReadValues() {
-    //fmt.Printf("Field: %v, Value: %v\n", fieldValue.Field, fieldValue.Value)
-    if fieldValue.Field.Kind == "record" {
-      StripeRecord(fieldValue.Field, fieldValue.Value, datastore)
+    childWriter := Writer{fieldValue.Field.Name, fieldValue.Field, fieldValue.Value, &writer}
+    childRepetitionLevel := rLevel
+
+    // if we've seen this field already
+    if _, present := seenFields[fieldValue.Field.Name]; present {
+       childRepetitionLevel = childWriter.RepeatedFieldDepth()
     } else {
-      fmt.Printf("Field: %v, Value: %v\n", fieldValue.Field, fieldValue.Value)
+      seenFields[fieldValue.Field.Name] = true
+    }
+
+    if fieldValue.Field.Kind == "record" {
+      StripeRecord(fieldValue.Field, fieldValue.Value, datastore, childWriter, childRepetitionLevel)
+    } else {
+      fmt.Printf("Field: %v, Value: %v, rLevel: %v\n", fieldValue.Field.Name, fieldValue.Value, childRepetitionLevel)
     }
 
   }
