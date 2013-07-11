@@ -9,17 +9,17 @@ type Row struct {
 }
 
 type DataStore interface {
-  ReadColumn(column Column) []Row
-  WriteRow(column Column, row Row)
+  ReadColumn(column string) []Row
+  WriteRow(column string, row Row)
 }
 
 type MemStore struct {
-  data map[Column][]Row
+  data map[string][]Row
 }
 
-func (memStore *MemStore) ReadColumn(column Column) []Row  {
+func (memStore *MemStore) ReadColumn(column string) []Row  {
   return []Row{}
 }
 
-func (memStore *MemStore) WriteRow(column Column, row Row) {
+func (memStore *MemStore) WriteRow(column string, row Row) {
 }

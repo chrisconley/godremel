@@ -13,7 +13,7 @@ func TestAncestors(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)
@@ -40,7 +40,7 @@ func TestFindField(t *testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)
@@ -58,7 +58,7 @@ func TestGetCommonRepetitionLevel(t * testing.T) {
       t.Errorf("File error: %v\n", e)
   }
 
-  var schema Schema
+  var schema Field
   err := json.Unmarshal(file, &schema)
   if err != nil {
     t.Errorf("Json error: %v\n", err)

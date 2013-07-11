@@ -71,9 +71,9 @@ func findFields (fields []ProcessedField, paths ...string) []ProcessedField {
   return returnFields
 }
 
-type Schema struct {
-  Fields []Field
-}
+//type Schema struct {
+  //Fields []Field
+//}
 
 
 func GetLowestCommonAncestor(f1 ProcessedField, f2 ProcessedField) ProcessedField {
