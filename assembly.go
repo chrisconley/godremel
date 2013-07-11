@@ -92,10 +92,21 @@ func findReaderByField(field ProcessedField, readers []*Reader) *Reader {
 
 func (reader *Reader) NextReader(readers []*Reader) *Reader {
     destinationField := reader.FSM[reader.NextRepetionLevel()]
-    fmt.Printf("NextRepetionLevel: %v\n", reader.NextRepetionLevel())
     destinationReader := findReaderByField(destinationField, readers)
-    fmt.Printf("destinationReader: %v\n", destinationReader)
     return destinationReader
+}
+
+func (record *Record) ToMap() {
+  if record.Value != nil {
+    fmt.Printf("%v-%v\n", record.Name, record.Value)
+  }
+  if record.Values != nil {
+    fmt.Printf("%v-%v\n", record.Name, record.Values)
+  }
+
+  for _, r := range record.Children {
+    r.ToMap()
+  }
 }
 
 func countNonEmptyStrings(strings []string) int {
@@ -192,7 +203,8 @@ func appendValue(record *Record, reader *Reader, value string) {
 }
 
 func AssembleRecord(readers []*Reader) *Record {
-  record := &Record{Name: "root", Children:RecordChildren{}}
+  rootRecord := &Record{Name: "root", Children:RecordChildren{}}
+  record := rootRecord
 
   rootReader := EmptyReader
   lastReader := rootReader
@@ -208,6 +220,7 @@ func AssembleRecord(readers []*Reader) *Record {
       record = moveToLevel(record, reader, lastReader, lowestCommonAncestor)
       appendValue(record, reader, row.Value)
     } else {
+      // this is still messed up
       record = moveToLevel(record, reader, lastReader, lowestCommonAncestor)
     }
     reader = reader.NextReader(readers)
@@ -221,5 +234,5 @@ func AssembleRecord(readers []*Reader) *Record {
   fmt.Printf("FINAL RETURN\n")
   fmt.Printf("~~~lastreader: %v\n", lastReader)
   record = returnToLevel(record, rootReader, lastReader, EmptyReader)
-  return record
+  return rootRecord
 }

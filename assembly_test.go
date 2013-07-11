@@ -45,4 +45,6 @@ func TestAssembly(t *testing.T) {
     t.Errorf("hi")
   }
 
+  record.ToMap()
+
 }
