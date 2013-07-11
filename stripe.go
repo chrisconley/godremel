@@ -65,6 +65,23 @@ func (writer *Writer) RepeatedFieldDepth() int {
   return depth
 }
 
+func (writer *Writer) DefinitionLevel() int {
+  depth := 0
+  if writer.Field.Mode == "required" && writer.Value != nil {
+    depth++
+  }
+  //fmt.Printf("WRITER: %v %v\n", writer.Name, writer.Field.Mode)
+  parent := writer.Parent
+  for parent.Name != RootWriter.Name {
+    //fmt.Printf("PARENT: %v, %v, %v\n", parent.Name, parent.Field.Mode, parent.Value)
+    if parent.Field.Mode != "required" && parent.Value != nil {
+      depth++
+    }
+    parent = parent.Parent
+  }
+  return depth
+}
+
 func StripeRecord(field Field, record interface{}, datastore DataStore, writer Writer, rLevel int) {
   seenFields := map[string]bool{}
   //fmt.Printf("RECORD: %v\n", record)
@@ -83,7 +100,8 @@ func StripeRecord(field Field, record interface{}, datastore DataStore, writer W
     if fieldValue.Field.Kind == "record" {
       StripeRecord(fieldValue.Field, fieldValue.Value, datastore, childWriter, childRepetitionLevel)
     } else {
-      fmt.Printf("Field: %v, Value: %v, rLevel: %v\n", fieldValue.Field.Name, fieldValue.Value, childRepetitionLevel)
+      fmt.Printf("Field: %v, Value: %v, rLevel: %v, dLevel: %v\n", fieldValue.Field.Name, fieldValue.Value,
+        childRepetitionLevel, childWriter.DefinitionLevel())
     }
 
   }
