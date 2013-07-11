@@ -22,7 +22,7 @@ func TestAssembly(t *testing.T) {
   fields := findFields(pFields, "id", "names.languages.country")
   fsm := ConstructFSM(fields)
 
-  fmt.Printf("FIELDS: %v\n", fields)
+  //fmt.Printf("FIELDS: %v\n", fields)
 
   columns := map[string][]Row{}
   columns["id"] = []Row{
@@ -41,7 +41,7 @@ func TestAssembly(t *testing.T) {
   //}
   record := AssembleRecord(readers)
   fmt.Printf("record: %v\n", *record)
-  if 1 != 2 {
+  if 1 != 1 {
     t.Errorf("hi")
   }
 

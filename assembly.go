@@ -16,12 +16,6 @@ type Record struct {
 }
 type RepetitionLevel int
 
-type Row struct {
-  Value string
-  RepetitionLevel int
-  D int
-}
-
 func MakeReaders(columns map[string][]Row, fields []ProcessedField, fsm FSM2) []*Reader {
   readers := []*Reader{}
 
@@ -74,7 +68,6 @@ func (reader *Reader) NextRow() Row {
 
 func (reader *Reader) NextRepetionLevel() int {
   nextRow := reader.NextRow()
-  fmt.Printf("NextRow: %v\n", reader.NextRow())
   return nextRow.RepetitionLevel
 }
 
@@ -126,28 +119,17 @@ func moveToLevel(record *Record, nextReader *Reader, lastReader *Reader, lowestC
     commonPaths := strings.Split(commonPath, ".")
     nextPaths := strings.Split(nextPath, ".")
     lastPaths := strings.Split(lastPath, ".")
-    fmt.Printf("MOVING\n")
-    fmt.Printf("RECORD: %v\n", record.Name)
+
     // end nested records up to lowest common ancestor of next and last reader
     for index := countNonEmptyStrings(lastPaths); index > countNonEmptyStrings(commonPaths); index-- {
-      fmt.Printf("ENDING\n")
-      fmt.Printf("Len commonPaths: %v\n", countNonEmptyStrings(commonPaths))
-      fmt.Printf("LastPaths: %v, Len lastPaths: %v\n", lastPaths, countNonEmptyStrings(lastPaths))
-      fmt.Printf("Index: %v\n", index)
       record = record.Parent
-      fmt.Printf("RECORD: %v\n", record.Name)
     }
 
     // start nested records up from lowest common ancestor to nextReader.Path
     for index := countNonEmptyStrings(commonPaths); index < countNonEmptyStrings(nextPaths); index++ {
-      fmt.Printf("STARTING\n")
-      fmt.Printf("Len commonPaths: %v\n", countNonEmptyStrings(commonPaths))
-      fmt.Printf("Len nextPaths: %v\n", countNonEmptyStrings(nextPaths))
-      fmt.Printf("Index: %v\n", index)
       name := nextPaths[index]
       record.Children[name] = &Record{Name:name, Children:RecordChildren{}, Parent: record}
       record = record.Children[name]
-      fmt.Printf("RECORD: %v\n", record.Name)
     }
 
     // set lastReader to one at newLevel
@@ -158,24 +140,15 @@ func moveToLevel(record *Record, nextReader *Reader, lastReader *Reader, lowestC
 
 func returnToLevel(record *Record, nextReader *Reader, lastReader *Reader, lowestCommonAncestor *Reader) (*Record) {
     commonPath := lowestCommonAncestor.Field.Path
-    nextPath := nextReader.Field.Path
+    //nextPath := nextReader.Field.Path
     lastPath := lastReader.Field.Path
     commonPaths := strings.Split(commonPath, ".")
-    nextPaths := strings.Split(nextPath, ".")
+    //nextPaths := strings.Split(nextPath, ".")
     lastPaths := strings.Split(lastPath, ".")
-    fmt.Printf("LowestCommonAncestor Path: %v\n", commonPaths)
-    fmt.Printf("Next Path: %v\n", nextPaths)
-    fmt.Printf("Last Path: %v\n", lastPaths)
-    fmt.Printf("RECORD: %v\n", record.Name)
 
     // end nested records up to lowest common ancestor of next and last reader
     for index := countNonEmptyStrings(lastPaths); index > countNonEmptyStrings(commonPaths); index-- {
-      fmt.Printf("ENDING\n")
-      fmt.Printf("Len commonPaths: %v\n", countNonEmptyStrings(commonPaths))
-      fmt.Printf("Len lastPaths: %v\n", countNonEmptyStrings(nextPaths))
-      fmt.Printf("Index: %v\n", index)
       record = record.Parent
-      fmt.Printf("RECORD: %v\n", record.Name)
     }
 
     // set lastReader to one at newLevel
@@ -226,13 +199,9 @@ func AssembleRecord(readers []*Reader) *Record {
     reader = reader.NextReader(readers)
     if (reader != EmptyReader) {
       lowestCommonAncestor = getLowestCommonReaderAncestor(reader, lastReader, readers)
-      fmt.Printf("ALMOST FINAL RETURN\n")
-      fmt.Printf("reader%v\n", reader)
       record = returnToLevel(record, reader, lastReader, lowestCommonAncestor)
     }
   }
-  fmt.Printf("FINAL RETURN\n")
-  fmt.Printf("~~~lastreader: %v\n", lastReader)
   record = returnToLevel(record, rootReader, lastReader, EmptyReader)
   return rootRecord
 }
